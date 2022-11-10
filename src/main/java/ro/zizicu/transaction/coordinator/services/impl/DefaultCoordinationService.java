@@ -2,48 +2,58 @@ package ro.zizicu.transaction.coordinator.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
 import ro.zizicu.nwbase.transaction.TransactionMessage;
+import ro.zizicu.nwbase.transaction.TransactionStatusMessage;
+import ro.zizicu.transaction.coordinator.data.entities.DistributedTransaction;
 import ro.zizicu.transaction.coordinator.data.entities.Microservice;
-import ro.zizicu.transaction.coordinator.data.entities.ServiceTransaction;
-import ro.zizicu.transaction.coordinator.data.entities.Transaction;
+import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
+import ro.zizicu.transaction.coordinator.data.repository.DistributedTransactionRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceRepository;
-import ro.zizicu.transaction.coordinator.data.repository.ServiceTransactionRepository;
-import ro.zizicu.transaction.coordinator.data.repository.TransactionRepository;
+import ro.zizicu.transaction.coordinator.data.repository.MicroserviceTransactionRepository;
 import ro.zizicu.transaction.coordinator.services.CoordinationService;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultCoordinationService implements CoordinationService {
 
-    private final ServiceTransactionRepository serviceTransactionRepository;
+    private final MicroserviceTransactionRepository microserviceTransactionRepository;
     private final MicroserviceRepository microserviceRepository;
-    private final TransactionRepository transactionRepository;
+    private final DistributedTransactionRepository distributedTransactionRepository;
 
     @Override
-    @KafkaListener(topics = "stockUpdateTopic", groupId = "test")
-    public void processMessage(TransactionMessage message) {
-        log.info("received transaction message {}", message.toString());
+    public MicroserviceTransaction createTransactionStep(TransactionMessage transactionMessage) {
+        log.debug("transaction message {}", transactionMessage.toString());
+        Microservice microservice = microserviceRepository.findByName(transactionMessage.getServiceName());
+        MicroserviceTransaction microserviceTransaction = new MicroserviceTransaction();
+        microserviceTransaction.setService(microservice);
 
-        Microservice microservice = microserviceRepository.findByName( message.getServiceName() ).get(0);
+        Optional<DistributedTransaction> distributedTransactionOptional =
+                distributedTransactionRepository.findByTransactionId(transactionMessage.getTransactionId());
+        if(distributedTransactionOptional.isEmpty()) {
+            DistributedTransaction distributedTransaction = new DistributedTransaction();
+            distributedTransaction.setTransactionId( transactionMessage.getTransactionId() );
 
-        ServiceTransaction serviceTransaction = new ServiceTransaction();
-        serviceTransaction.setService(microservice);
-        Transaction transaction = transactionRepository.findByTransactionId(message.getTransactionId());
-        serviceTransaction.setTransaction(transaction);
-        log.debug("Save service transaction {}", message.getTransactionId());
-        serviceTransaction.setIsLast(message.getIsLastStep());
-        serviceTransactionRepository.save(serviceTransaction);
-
-        if( message.getIsLastStep() ) {
-            log.debug("Find all steps for transaction {}", message.getTransactionId());
-            List<ServiceTransaction> serviceTransactions = serviceTransactionRepository.findAllByTransactionId(message.getTransactionId());
-            log.debug("Sending commit message for transaction {}", message.getTransactionId());
-
+            distributedTransactionOptional = Optional.of(distributedTransaction);
         }
+        microserviceTransaction.setIsLast(transactionMessage.getIsLastStep());
+        return microserviceTransactionRepository.save(microserviceTransaction);
     }
+
+    @Override
+    public TransactionStatusMessage getTransactionStatus(Long transactionId) {
+        Optional<DistributedTransaction> distributedTransactionOptional =
+                distributedTransactionRepository.findByTransactionId(transactionId);
+        return null;
+    }
+
+    @Override
+    public void updateTransactionStatus() {
+
+    }
+
 }

@@ -2,14 +2,18 @@ package ro.zizicu.transaction.coordinator.data.entities;
 
 
 import lombok.Data;
+import lombok.ToString;
 import ro.zizicu.nwbase.entity.IdentityOwner;
+import ro.zizicu.nwbase.transaction.TransactionStatus;
+
 
 import javax.persistence.*;
 
-@Entity
 @Data
-@Table(name = "service_transactions")
-public class ServiceTransaction implements IdentityOwner<Integer> {
+@Entity
+@Table(name = "microservice_transactions")
+@ToString
+public class MicroserviceTransaction implements IdentityOwner<Integer> {
 
     @Id
     @Column(name = "service_transaction_id")
@@ -17,9 +21,10 @@ public class ServiceTransaction implements IdentityOwner<Integer> {
     private Integer id;
 
     @Column
-    private String state;
+    private TransactionStatus state;
 
     @Column(name = "is_last_step")
+
     private Boolean isLast;
 
     @ManyToOne
@@ -28,11 +33,10 @@ public class ServiceTransaction implements IdentityOwner<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "transaction_id")
-    private Transaction transaction;
-
+    private DistributedTransaction transaction;
 
     @Override
     public String getEntityName() {
-        return "ServiceTransaction";
+        return "MicroserviceTransaction";
     }
 }

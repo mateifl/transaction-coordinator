@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "service")
+@Table(name = "microservices")
 public class Microservice implements NamedIdentityOwner<Integer> {
 
     @Id
@@ -22,6 +22,6 @@ public class Microservice implements NamedIdentityOwner<Integer> {
 
     @Override
     public String getEntityName() {
-        return "Service";
+        return "Microservice";
     }
 }
