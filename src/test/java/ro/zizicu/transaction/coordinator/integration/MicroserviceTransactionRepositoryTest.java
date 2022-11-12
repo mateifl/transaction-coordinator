@@ -1,16 +1,17 @@
 package ro.zizicu.transaction.coordinator.integration;
 
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import ro.zizicu.nwbase.transaction.TransactionStatus;
 import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
 import ro.zizicu.transaction.coordinator.data.repository.DistributedTransactionRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceTransactionRepository;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 public class MicroserviceTransactionRepositoryTest {

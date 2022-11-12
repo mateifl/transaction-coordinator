@@ -1,13 +1,19 @@
 package ro.zizicu.transaction.coordinator.data.entities;
 
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import lombok.Data;
 import lombok.ToString;
 import ro.zizicu.nwbase.entity.IdentityOwner;
 import ro.zizicu.nwbase.transaction.TransactionStatus;
-
-
-import javax.persistence.*;
 
 @Data
 @Entity
@@ -24,7 +30,6 @@ public class MicroserviceTransaction implements IdentityOwner<Integer> {
     private TransactionStatus state;
 
     @Column(name = "is_last_step")
-
     private Boolean isLast;
 
     @ManyToOne
