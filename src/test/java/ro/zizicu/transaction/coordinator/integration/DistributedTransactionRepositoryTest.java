@@ -11,6 +11,9 @@ import ro.zizicu.nwbase.transaction.TransactionStatus;
 import ro.zizicu.transaction.coordinator.data.entities.DistributedTransaction;
 import ro.zizicu.transaction.coordinator.data.repository.DistributedTransactionRepository;
 
+import java.sql.Date;
+import java.util.Calendar;
+
 @SpringBootTest
 public class DistributedTransactionRepositoryTest {
 
@@ -20,17 +23,17 @@ public class DistributedTransactionRepositoryTest {
 
     @Test
     public void testSave() {
-
+        Calendar now = Calendar.getInstance();
         DistributedTransaction distributedTransaction = new DistributedTransaction();
         distributedTransaction.setTransactionId(1L);
         distributedTransaction.setStatus(TransactionStatus.UNCOMMITED);
-//        distributedTransaction.setTransactionDate(new Date());
+        distributedTransaction.setTransactionDate(new Date(now.getTimeInMillis()));
         assertNotNull(transactionRepository.save(distributedTransaction));
 
         DistributedTransaction distributedTransaction2 = new DistributedTransaction();
         distributedTransaction2.setTransactionId(2L);
         distributedTransaction2.setStatus(TransactionStatus.COMMITED);
-//        distributedTransaction.setTransactionDate(new Date());
+        distributedTransaction2.setTransactionDate(new Date(now.getTimeInMillis()));
         assertNotNull(transactionRepository.save(distributedTransaction2));
 
     }
