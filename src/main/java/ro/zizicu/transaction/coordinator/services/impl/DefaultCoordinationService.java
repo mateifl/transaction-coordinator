@@ -15,7 +15,10 @@ import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
 import ro.zizicu.transaction.coordinator.data.repository.DistributedTransactionRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceTransactionRepository;
+import ro.zizicu.transaction.coordinator.exceptions.DistributedTransactionNotFound;
 import ro.zizicu.transaction.coordinator.services.CoordinationService;
+
+import javax.transaction.Transactional;
 
 @Service
 @Slf4j
@@ -27,6 +30,7 @@ public class DefaultCoordinationService implements CoordinationService {
     private final DistributedTransactionRepository distributedTransactionRepository;
 
     @Override
+    @Transactional
     public MicroserviceTransaction createTransactionStep(TransactionMessage transactionMessage) {
         log.debug("creating transaction step {}", transactionMessage.toString());
         Microservice microservice = microserviceRepository.findByName(transactionMessage.getServiceName());
@@ -46,15 +50,24 @@ public class DefaultCoordinationService implements CoordinationService {
         	microserviceTransaction.setState(TransactionStatus.READY_TO_COMMIT);
         else
         	microserviceTransaction.setState(TransactionStatus.ROLLEDBACK);
-        log.debug("persist microservice transaction {}", microserviceTransaction.toString());
+        log.debug("persist microservice transaction {}", microserviceTransaction);
         return microserviceTransactionRepository.save(microserviceTransaction);
     }
 
     @Override
     public TransactionStatusMessage getTransactionStatus(Long transactionId) {
+        log.info("get status for distributed transaction {}", transactionId);
         Optional<DistributedTransaction> distributedTransactionOptional =
                 distributedTransactionRepository.findByTransactionId(transactionId);
-        return null;
+        if(distributedTransactionOptional.isPresent()) {
+            TransactionStatusMessage message = new TransactionStatusMessage();
+            message.setStatus(distributedTransactionOptional.get().getStatus());
+            message.setTransactionId(transactionId);
+            return message;
+        }
+        else
+            throw new DistributedTransactionNotFound();
+
     }
 
     @Override

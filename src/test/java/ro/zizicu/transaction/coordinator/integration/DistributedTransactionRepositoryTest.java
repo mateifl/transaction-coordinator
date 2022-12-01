@@ -18,8 +18,7 @@ import java.util.Calendar;
 public class DistributedTransactionRepositoryTest {
 
     @Autowired
-    private DistributedTransactionRepository transactionRepository;
-
+    private DistributedTransactionRepository distributedTransactionRepository;
 
     @Test
     public void testSave() {
@@ -28,13 +27,13 @@ public class DistributedTransactionRepositoryTest {
         distributedTransaction.setTransactionId(1L);
         distributedTransaction.setStatus(TransactionStatus.UNCOMMITED);
         distributedTransaction.setTransactionDate(new Date(now.getTimeInMillis()));
-        assertNotNull(transactionRepository.save(distributedTransaction));
+        assertNotNull(distributedTransactionRepository.save(distributedTransaction));
 
         DistributedTransaction distributedTransaction2 = new DistributedTransaction();
         distributedTransaction2.setTransactionId(2L);
         distributedTransaction2.setStatus(TransactionStatus.COMMITED);
         distributedTransaction2.setTransactionDate(new Date(now.getTimeInMillis()));
-        assertNotNull(transactionRepository.save(distributedTransaction2));
+        assertNotNull(distributedTransactionRepository.save(distributedTransaction2));
 
     }
 

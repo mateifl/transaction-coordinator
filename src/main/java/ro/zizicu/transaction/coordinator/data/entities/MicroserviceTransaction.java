@@ -37,7 +37,7 @@ public class MicroserviceTransaction implements IdentityOwner<Integer> {
     private Microservice service;
 
     @ManyToOne
-    @JoinColumn(name = "transaction_id")
+    @JoinColumn(name = "distributed_transaction_id")
     private DistributedTransaction transaction;
 
     @Override
