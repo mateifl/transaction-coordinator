@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ro.zizicu.nwbase.transaction.TransactionMessage;
+import ro.zizicu.nwbase.transaction.TransactionStatusMessage;
 import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
 import ro.zizicu.transaction.coordinator.services.CoordinationService;
 
@@ -21,7 +22,12 @@ public class TransactionController {
     public ResponseEntity<?> createTransactionStep(@RequestBody TransactionMessage message) {
     	log.debug("transaction message {}", message.toString());
         MicroserviceTransaction microserviceTransaction = coordinationService.createTransactionStep(message);
-        return ResponseEntity.ok().body(microserviceTransaction);
+        TransactionStatusMessage statusMessage = TransactionStatusMessage.builder()
+        		.status( microserviceTransaction.getTransaction().getStatus() )
+        		.transactionId(microserviceTransaction.getTransaction().getTransactionId())
+        		.build();
+        
+        return ResponseEntity.ok().body(statusMessage);
     }
 
     @GetMapping(value = "/{transactionId}")

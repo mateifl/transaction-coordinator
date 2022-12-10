@@ -2,6 +2,8 @@ package ro.zizicu.transaction.coordinator.services.impl;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +19,7 @@ import ro.zizicu.transaction.coordinator.data.repository.MicroserviceRepository;
 import ro.zizicu.transaction.coordinator.data.repository.MicroserviceTransactionRepository;
 import ro.zizicu.transaction.coordinator.exceptions.DistributedTransactionNotFound;
 import ro.zizicu.transaction.coordinator.services.CoordinationService;
-
-import javax.transaction.Transactional;
+import ro.zizicu.transaction.coordinator.utils.DateUtils;
 
 @Service
 @Slf4j
@@ -40,7 +41,10 @@ public class DefaultCoordinationService implements CoordinationService {
         Optional<DistributedTransaction> distributedTransactionOptional =
                 distributedTransactionRepository.findByTransactionId(transactionMessage.getTransactionId());
         if(distributedTransactionOptional.isEmpty()) {
+        	log.info("distributed transaction with id {} not found, creating a new one", transactionMessage.getTransactionId());
             DistributedTransaction distributedTransaction = new DistributedTransaction();
+            distributedTransaction.setStatus(TransactionStatus.UNCOMMITED);
+            distributedTransaction.setTransactionDate(DateUtils.getSQLDateNow());
             distributedTransaction.setTransactionId(transactionMessage.getTransactionId());
             distributedTransactionOptional = Optional.of(distributedTransaction);
         }
@@ -51,7 +55,22 @@ public class DefaultCoordinationService implements CoordinationService {
         else
         	microserviceTransaction.setState(TransactionStatus.ROLLEDBACK);
         log.debug("persist microservice transaction {}", microserviceTransaction);
-        return microserviceTransactionRepository.save(microserviceTransaction);
+        microserviceTransaction = microserviceTransactionRepository.save(microserviceTransaction);
+        if(microserviceTransaction.getIsLast())
+        {
+        	log.info("last step, checking distributed transaction status {}", transactionMessage.getTransactionId());
+        	boolean readyToCommit = microserviceTransactionRepository.findAllByTransactionId( transactionMessage.getTransactionId() )
+        		.stream()
+        		.allMatch( v -> v.getState() == TransactionStatus.READY_TO_COMMIT );
+        	
+        	if(readyToCommit) {
+        		log.info("distributed transaction {} ready to commit", transactionMessage.getTransactionId());
+        		distributedTransactionOptional.get().setStatus(TransactionStatus.READY_TO_COMMIT);
+        		distributedTransactionRepository.save(distributedTransactionOptional.get());
+        	}
+        }
+        
+        return microserviceTransaction;
     }
 
     @Override

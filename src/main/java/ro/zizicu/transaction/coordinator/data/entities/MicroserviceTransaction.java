@@ -1,6 +1,7 @@
 package ro.zizicu.transaction.coordinator.data.entities;
 
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,7 +37,7 @@ public class MicroserviceTransaction implements IdentityOwner<Integer> {
     @JoinColumn(name = "service_id")
     private Microservice service;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "distributed_transaction_id")
     private DistributedTransaction transaction;
 
