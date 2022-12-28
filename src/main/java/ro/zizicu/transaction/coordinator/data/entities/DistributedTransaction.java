@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 import lombok.Data;
 import ro.zizicu.nwbase.entity.IdentityOwner;
-import ro.zizicu.nwbase.transaction.TransactionStatus;
+import ro.zizicu.nwbase.transaction.DistributedTransactionStatus;
 
 @Entity
 @Table(name = "distributed_transactions")
@@ -31,7 +31,7 @@ public class DistributedTransaction implements IdentityOwner<Integer> {
     private Long transactionId;
 
     @Column
-    private TransactionStatus status;
+    private DistributedTransactionStatus status;
 
     @Override
     public String getEntityName() {

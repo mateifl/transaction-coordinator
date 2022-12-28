@@ -7,5 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
 
 public interface MicroserviceTransactionRepository extends CrudRepository<MicroserviceTransaction, Integer> {
-    List<MicroserviceTransaction> findAllByTransactionId(Long transactionId);
+	
+    List<MicroserviceTransaction> findAllByTransactionTransactionId(Long transactionId);
 }

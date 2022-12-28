@@ -19,9 +19,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {DistributedTransactionNotFound.class, DataAccessException.class })
     protected ResponseEntity<Object> handleConflict(RuntimeException exception, WebRequest webRequest) {
+    	String errorClass = exception.getClass().getName();
+    	log.error(errorClass);
     	log.error(exception.getMessage());
         return handleExceptionInternal(exception,
-                new RestError(exception.getMessage(), 1),
+                new RestError(errorClass, exception.getMessage(), 1),
                 new HttpHeaders(),
                 HttpStatus.BAD_REQUEST,
                 webRequest);

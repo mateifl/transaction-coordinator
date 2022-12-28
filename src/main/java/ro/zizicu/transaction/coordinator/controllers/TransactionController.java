@@ -22,6 +22,7 @@ public class TransactionController {
     public ResponseEntity<?> createTransactionStep(@RequestBody TransactionMessage message) {
     	log.debug("transaction message {}", message.toString());
         MicroserviceTransaction microserviceTransaction = coordinationService.createTransactionStep(message);
+        log.debug("transaction step created {}", message.getTransactionId());
         TransactionStatusMessage statusMessage = TransactionStatusMessage.builder()
         		.status( microserviceTransaction.getTransaction().getStatus() )
         		.transactionId(microserviceTransaction.getTransaction().getTransactionId())

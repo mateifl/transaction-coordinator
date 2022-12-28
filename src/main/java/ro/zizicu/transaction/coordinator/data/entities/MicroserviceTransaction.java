@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
 import ro.zizicu.nwbase.entity.IdentityOwner;
-import ro.zizicu.nwbase.transaction.TransactionStatus;
+import ro.zizicu.nwbase.transaction.DistributedTransactionStatus;
 
 @Data
 @Entity
@@ -28,7 +28,7 @@ public class MicroserviceTransaction implements IdentityOwner<Integer> {
     private Integer id;
 
     @Column
-    private TransactionStatus state;
+    private DistributedTransactionStatus state;
 
     @Column(name = "is_last_step")
     private Boolean isLast;
@@ -37,7 +37,7 @@ public class MicroserviceTransaction implements IdentityOwner<Integer> {
     @JoinColumn(name = "service_id")
     private Microservice service;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "distributed_transaction_id")
     private DistributedTransaction transaction;
 

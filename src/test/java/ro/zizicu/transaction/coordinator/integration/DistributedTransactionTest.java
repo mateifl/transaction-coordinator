@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import ro.zizicu.nwbase.transaction.TransactionStatus;
+import ro.zizicu.nwbase.transaction.DistributedTransactionStatus;
 import ro.zizicu.transaction.coordinator.data.entities.DistributedTransaction;
 import ro.zizicu.transaction.coordinator.data.entities.MicroserviceTransaction;
 import ro.zizicu.transaction.coordinator.data.repository.DistributedTransactionRepository;
@@ -52,15 +52,16 @@ public class DistributedTransactionTest {
         Calendar now = Calendar.getInstance();
         DistributedTransaction distributedTransaction = new DistributedTransaction();
         distributedTransaction.setTransactionId(transactionId);
-        distributedTransaction.setStatus(TransactionStatus.UNCOMMITED);
+        distributedTransaction.setStatus(DistributedTransactionStatus.UNCOMMITED);
         distributedTransaction.setTransactionDate(new Date(now.getTimeInMillis()));
-        assertNotNull(distributedTransactionRepository.save(distributedTransaction));
+        DistributedTransaction fromDB = distributedTransactionRepository.save(distributedTransaction);
+        assertNotNull(fromDB);
 
         MicroserviceTransaction microserviceTransaction = new MicroserviceTransaction();
 
         microserviceTransaction.setService(microserviceRepository.findByName("product"));
-        microserviceTransaction.setTransaction(distributedTransactionRepository.findByTransactionId(transactionId).get());
-        microserviceTransaction.setState(TransactionStatus.READY_TO_COMMIT);
+        microserviceTransaction.setTransaction(fromDB);
+        microserviceTransaction.setState(DistributedTransactionStatus.READY_TO_COMMIT);
         microserviceTransaction.setIsLast(Boolean.FALSE);
         assertNotNull(microserviceTransactionRepository.save(microserviceTransaction));
     }
